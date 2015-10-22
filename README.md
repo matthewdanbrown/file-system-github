@@ -1,7 +1,7 @@
 # file-system-github
 [![Build Status](https://travis-ci.org/philcockfield/file-system-github.svg)](https://travis-ci.org/philcockfield/file-system-github)
 
-Synchronization with the file-system on a remote repository.
+File-system synchronization with a remote repository on Github.
 
 
 ## Run
