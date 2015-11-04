@@ -6,9 +6,9 @@ import httpPromises from "http-promises";
  * An [http-promises] object initialized with github user-agent.
  * @param {string} userAgent: The callers Github username or application name.
  * @param {object} options:
- *                    - authToken: The authorization token to use for calls to
- *                                 restricted resources.
- *                                 see: https://github.com/settings/tokens
+ *                    - token: The authorization token to use for calls to
+ *                             restricted resources.
+ *                             see: https://github.com/settings/tokens
  */
 export default (userAgent, options = {}) => {
   // Setup the user-agent.
@@ -18,9 +18,9 @@ export default (userAgent, options = {}) => {
   let http = httpPromises.header("User-Agent", userAgent);
 
   // Add authorization.
-  const authToken = options.authToken;
-  if (!R.isNil(authToken)) {
-    http = http.header("Authorization", `token ${ authToken }`);
+  const token = options.token;
+  if (!R.isNil(token)) {
+    http = http.header("Authorization", `token ${ token }`);
   }
 
   // Finish up.

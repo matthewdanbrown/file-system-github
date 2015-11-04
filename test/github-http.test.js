@@ -14,7 +14,7 @@ describe("github-http", function() {
   });
 
   it("does not have an authorization token", () => {
-    const http = githubHttp("my-app", { authToken: 'a12345' });
+    const http = githubHttp("my-app", { token: 'a12345' });
     expect(http.headers["Authorization"]).to.equal("token a12345");
   });
 });
