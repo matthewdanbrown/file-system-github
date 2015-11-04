@@ -1,9 +1,9 @@
 import httpPromises from "http-promises";
+import github from "./github-http";
 
 
-const http = httpPromises
-  .header("Authorization", `token ${ process.env.GITHUB_TOKEN }`)
-  .header("User-Agent", "file-system-github");
+const http = github("file-system-github", { authToken: process.env.GITHUB_TOKEN });
+
 
 
 const get = (url) => {
@@ -20,8 +20,12 @@ const get = (url) => {
     .catch(err => console.log("err", err));
 };
 
+const foo;
+
+// foo.copy()
 
 
 // get("user");
 get("repos/philcockfield/file-system-github/contents/src?ref=master")
+console.log("-------------------------------------------");
 get("repos/philcockfield/file-system-github/contents/README.md?ref=master")
