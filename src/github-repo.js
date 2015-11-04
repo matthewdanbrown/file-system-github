@@ -6,7 +6,8 @@ import githubPaths from "./github-paths";
 
 
 /**
- * An [http-promises] object initialized with github user-agent.
+ * A representation of a Github repository.
+ *
  * @param {string} userAgent: The callers Github username or application name.
  * @param {string} repo:      The repository, eg: "username/my-repo"
  * @param {object} options:

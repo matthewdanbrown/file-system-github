@@ -5,6 +5,7 @@ const foldersOnly = R.filter(item => item.type === "dir");
 
 /**
  * Methods for recursively retrieveing path details about a repository.
+ *
  * @param http: The {GithubHttp} object.
  * @param repo: The name of the repository, eg: "bob/my-repo".
  */
@@ -17,6 +18,7 @@ export default (http, repo) => {
   /**
    * Retrieves the flat array of paths to content starting at the given
    * entry point.
+   *
    * @param {string} path: The entry path from the root of the repo, to
    *                       either a file of folder.
    *                       eg: "/src"

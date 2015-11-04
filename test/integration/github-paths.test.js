@@ -1,6 +1,5 @@
 "use strict";
 import { expect } from "chai";
-import githubFs from "../../src/github-fs";
 import githubPaths from "../../src/github-paths";
 import githubHttp from "../../src/github-http";
 

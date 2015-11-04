@@ -4,6 +4,7 @@ import httpPromises from "http-promises";
 
 /**
  * An [http-promises] object initialized with github user-agent.
+ *
  * @param {string} userAgent: The callers Github username or application name.
  * @param {object} options:
  *                    - token: The authorization token to use for calls to
