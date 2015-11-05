@@ -1,6 +1,7 @@
 import R from "ramda";
 const filesOnly = R.filter(item => item.type === "file");
 const foldersOnly = R.filter(item => item.type === "dir");
+import Promise from "bluebird";
 
 
 /**

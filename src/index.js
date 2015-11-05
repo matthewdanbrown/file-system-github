@@ -20,9 +20,6 @@ const get = (url) => {
     .catch(err => console.log("err", err));
 };
 
-const foo;
-
-// foo.copy()
 
 
 // get("user");
