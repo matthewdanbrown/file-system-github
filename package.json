@@ -1,6 +1,6 @@
 {
   "name": "file-system-github",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "File-system synchronization with a remote repository on Github.",
   "main": "./lib/index.js",
   "scripts": {
