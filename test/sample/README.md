@@ -1,2 +1,2 @@
 # Sample README file.
-Branch: master
+Branch: sample-test-branch
