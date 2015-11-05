@@ -11,6 +11,9 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 #### Fixed
 #### Security
 
-## [0.0.1] - YYYY-MM-DD
+## [0.0.2] - 2015-11-5
 #### Added
-Initial creation and publish.
+- Connect to a repo, optionally authenticating, and make calls against the REST api.
+- Retrieves a deep set of paths for files within a repo, starting at any place within the repo.
+- Copy files to the local file system.
+- Optionally copy based on specified branch.
