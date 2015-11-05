@@ -36,9 +36,11 @@ export default (userAgent, repo, options = {}) => {
    *                              Pass "/" or nothing to copy from root.
    * @param {string} targetPath:  The local path to copy to.
    * @param {object} options:
-   *                    - deep: Flag indicating if the folder structure should
-   *                            be recursively retrieved.
-   *                            Default: true.
+   *                    - deep:   Flag indicating if the folder structure should
+   *                              be recursively retrieved.
+   *                              Default: true.
+   *                    - branch: The branch to query.
+   *                              Default: "master".
    * @return {Promise}
    */
   const copy = (entryPath, targetPath, options = {}) => {

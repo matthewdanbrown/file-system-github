@@ -25,15 +25,19 @@ export default (http, repo) => {
    *                       eg: "/src"
    *                       Default reads from the root of the repo.
    * @param {object} options:
-   *                    - deep: Flag indicating if the folder structure should
-   *                            be recursively retrieved.
-   *                            Default: true.
+   *                    - deep:   Flag indicating if the folder structure should
+   *                              be recursively retrieved.
+   *                              Default: true.
+   *                    - branch: The branch to query.
+   *                              Default: "master".
+   *
    * @return {Promise} => flat array of files
    */
   const getFilePaths = (path, options = {}) => {
     // Setup initial conditions.
     path = path.replace(/^\//, ""); // Remove initial forward-slash.
     const deep = options.deep === undefined ? true : options.deep;
+    const branch = options.branch || "master";
 
     const getChildFiles = (items) => {
       return new Promise((resolve, reject) => {
@@ -63,9 +67,9 @@ export default (http, repo) => {
       });
     };
 
-    // https://developer.github.com/v3/repos/contents/
+    // See: https://developer.github.com/v3/repos/contents/
     return new Promise((resolve, reject) => {
-        const url = `repos/${ repo }/contents/${ path || "" }`;
+        const url = `repos/${ repo }/contents/${ path || "" }?ref=${ branch }`;
         get(url)
         .then(result => {
             let data = result.data;

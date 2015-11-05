@@ -63,7 +63,7 @@ describe("github-paths (integration)", function() {
   it("rejects when path does not exist", (done) => {
     github.files("/this/is/not/a/path")
     .catch(err => {
-        expect(err.message.endsWith("not/a/path")).to.equal(true);
+        expect(err.message).to.contain("not/a/path");
         done()
     })
     .catch(err => console.log("ERROR", err));

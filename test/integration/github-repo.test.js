@@ -51,21 +51,37 @@ describe("github-repo (integration)", function() {
 
 
   describe("copy", function() {
-    it("copies a single file", (done) => {
+    it("copies a single file ('master' branch by default)", (done) => {
       repo.copy("/test/sample/README.md", "./test/.temp")
       .then(result => {
           const path = fsPath.join(result.base, result.files[0]);
-          expect(fs.readFileSync(path).toString()).to.contain("# Sample README file.");
+          const content = fs.readFileSync(path).toString();
+          expect(content).to.contain("# Sample README file.");
+          expect(content).to.contain("Branch: master");
           done();
       })
       .catch(err => console.log("ERROR", err));
     });
 
+    it("copies a single file (specified branch)", (done) => {
+      repo.copy("/test/sample/README.md", "./test/.temp", { branch: "sample-test-branch" })
+      .then(result => {
+          const path = fsPath.join(result.base, result.files[0]);
+          const content = fs.readFileSync(path).toString();
+          expect(content).to.contain("# Sample README file.");
+          expect(content).to.contain("Branch: sample-test-branch");
+          done();
+      })
+      .catch(err => console.log("ERROR", err));
+    });
+
+
     it("copies a set of files (deep)", (done) => {
       repo.copy("/test/sample", "./test/.temp")
       .then(result => {
-          const path = fsPath.join(result.base, result.files[0]);
-          expect(fs.readFileSync(path).toString()).to.contain("# Sample README file.");
+          const path = fsPath.join(result.base, result.files.sort()[0]);
+          const content = fs.readFileSync(path).toString();
+          expect(content).to.contain("# Sample README file.");
           done();
       })
       .catch(err => console.log("ERROR", err));
