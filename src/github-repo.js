@@ -10,8 +10,11 @@ import Promise from "bluebird";
 /**
  * A representation of a Github repository.
  *
- * @param {string} userAgent: The callers Github username or application name.
+ * @param {string} userAgent: The caller's Github username or application name.
+ *                            See: https://developer.github.com/v3/#user-agent-required
+ *
  * @param {string} repo:      The repository, eg: "username/my-repo"
+ *
  * @param {object} options:
  *                    - token: The authorization token to use for calls to
  *                             restricted resources.
