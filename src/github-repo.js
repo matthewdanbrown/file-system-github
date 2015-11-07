@@ -1,9 +1,35 @@
 import R from "ramda";
 import fs from "fs-extra";
+import Promise from "bluebird";
 import fsPath from "path";
 import githubHttp from "./github-http";
 import githubPaths from "./github-paths";
-import Promise from "bluebird";
+import repoFiles from "./repo-files";
+
+
+
+const removeRootSlash = (path) => path.replace(/^\//, "");
+const trimmedFolderPath = (path, entryFolder) => {
+    path = path.replace(new RegExp(`${ entryFolder }`), "");
+    path = fsPath.dirname(path);
+    path = removeRootSlash(path);
+    return path;
+  };
+
+
+
+const trimEntryPath = (entryPath, files) => {
+    files = R.clone(files);
+    let entryFolder = entryPath;
+    if (files.length === 1 && files[0].type === "file") {
+      // A single file was downloaded.
+      // Extract the directory part of the string.
+      entryFolder = fsPath.dirname(entryFolder);
+    }
+    entryFolder = removeRootSlash(entryFolder);
+    files.forEach(file => file.folder = trimmedFolderPath(file.path, entryFolder));
+    return files;
+  };
 
 
 
@@ -46,26 +72,24 @@ export default (userAgent, repo, options = {}) => {
    *                              Default: "master".
    * @return {Promise}
    */
-  const copy = (entryPath, targetPath, options = {}) => {
+  const get = (entryPath, options = {}) => {
     // Setup initial conditions.
     const deep = options.deep === undefined ? true : options.deep;
-    targetPath = fsPath.resolve(targetPath);
     entryPath = entryPath || "/";
 
     return new Promise((resolve, reject) => {
-        const saveFile = (path, content) => {
-            return new Promise((resolve, reject) => {
-                const saveTo = fsPath.join(targetPath, path);
-                fs.outputFile(saveTo, content, (err) => {
-                  if (err) { reject(err); } else { resolve(); }
-                });
-              });
-            };
-
-        const downloadFile = (url) => {
+        const downloadedFiles = [];
+        const downloadFile = (file) => {
               return new Promise((resolve, reject) => {
-                http.get(url)
-                  .then(result => resolve(result.data))
+                http.get(file.download_url)
+                  .then(result => {
+                      const item = {
+                        content: result.data,
+                        path: fsPath.join(file.folder, file.name)
+                      };
+                      downloadedFiles.push(item);
+                      resolve(item);
+                  })
                   .catch(err => reject(err));
               });
             };
@@ -73,42 +97,26 @@ export default (userAgent, repo, options = {}) => {
         // Retrieve paths then save the files.
         filePaths(entryPath, options)
           .then(result => {
-            let savedCount = 0;
-            const saved = { base: targetPath, files: [] };
-            const onSaved = (path) => {
-                  savedCount += 1;
-                  saved.files.push(path)
-                  if (savedCount == result.files.length) { resolve(saved); }
+            // Trim entry-folder from the start of the retrieved file paths.
+            const files = trimEntryPath(entryPath, result.files);
+            const onFileDownloaded = () => {
+                  if (downloadedFiles.length === files.length) {
+                    resolve(repoFiles(downloadedFiles));
+                  }
                 };
 
-            // Trim entry-folder from the resulting files.
-            let files = result.files;
-            let entryFolder = entryPath;
-            if (files.length === 1 && files[0].path === entryPath) {
-              entryFolder = fsPath.dirname(entryFolder);
-            }
-            entryFolder = entryFolder.replace(/^\//, "");
-            files = R.map(file => {
-                  file = R.clone(file);
-                  file.path = file.path.replace(new RegExp(`${ entryFolder }`), "")
-                  return file;
-                }, files);
-
-            // Download and save each file.
+            // Download files.
             files.forEach(file => {
-                  downloadFile(file.download_url)
-                  .then(content => {
-                      saveFile(file.path, content)
-                      .then(() => onSaved(file.path))
-                      .catch(err => reject(err));
-                  })
-                  .catch(err => reject(err));
+                  downloadFile(file)
+                    .then(content => onFileDownloaded())
+                    .catch(err => reject(err));
                 });
           })
           .catch(err => reject(err));
     });
   };
 
+
   // API.
-  return { name: repo, filePaths, copy };
+  return { name: repo, filePaths, get };
 };

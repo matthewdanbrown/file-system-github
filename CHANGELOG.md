@@ -5,8 +5,13 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 #### Added
+- `.get()` to retrieve a remote repos files in memory.
+- `.save()` method on the result of the `.get` call to persist files to disk.
+
 #### Changed
 - When an entry path is specified to `.copy()` the resulting files are copied into the root of the `target` folder.
+
+- Removed `copy` method (in favor of the `.get().save()` chain).
 
 #### Deprecated
 #### Removed

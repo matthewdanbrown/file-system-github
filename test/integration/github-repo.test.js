@@ -50,26 +50,28 @@ describe("github-repo (integration)", function() {
   });
 
 
-  describe("copy", function() {
-    it("copies a single file ('master' branch by default)", (done) => {
-      repo.copy("/test/sample/README.md", "./test/.temp")
+  describe("get", function() {
+    it("gets a single file ('master' branch by default)", (done) => {
+      repo.get("/test/sample/README.md")
       .then(result => {
-          const path = fsPath.join(result.base, result.files[0]);
-          const content = fs.readFileSync(path).toString();
-          expect(content).to.contain("# Sample README file.");
-          expect(content).to.contain("Branch: master");
+          const file = result.files[0];
+          expect(file.path).to.equal("README.md");
+          expect(file.content).to.contain("# Sample README file.");
+          expect(file.content).to.contain("Branch: master");
+          expect(result.save).to.be.an.instanceof(Function);
           done();
       })
       .catch(err => console.error("ERROR", err));
     });
 
+
     it("copies a single file (specified branch)", (done) => {
-      repo.copy("/test/sample/README.md", "./test/.temp", { branch: "sample-test-branch" })
+      repo.get("/test/sample/README.md", { branch: "sample-test-branch" })
       .then(result => {
-          const path = fsPath.join(result.base, result.files[0]);
-          const content = fs.readFileSync(path).toString();
-          expect(content).to.contain("# Sample README file.");
-          expect(content).to.contain("Branch: sample-test-branch");
+          const file = result.files[0];
+          expect(file.path).to.equal("README.md");
+          expect(file.content).to.contain("# Sample README file.");
+          expect(file.content).to.contain("Branch: sample-test-branch");
           done();
       })
       .catch(err => console.error("ERROR", err));
@@ -77,11 +79,16 @@ describe("github-repo (integration)", function() {
 
 
     it("copies a set of files (deep)", (done) => {
-      repo.copy("/test/sample", "./test/.temp")
+      repo.get("/test/sample")
       .then(result => {
-          const path = fsPath.join(result.base, result.files.sort()[0]);
-          const content = fs.readFileSync(path).toString();
-          expect(content).to.contain("# Sample README file.");
+          const files = R.sortBy(R.prop("path"), result.files);
+          expect(files.length).to.equal(6);
+
+          expect(files[0].path).to.equal("README.md");
+          expect(files[0].content).to.contain("# Sample README file.");
+
+          expect(files[1].path).to.equal("folder/README.md");
+          expect(files[1].content).to.contain("# Test conflict with matching file-name");
           done();
       })
       .catch(err => console.error("ERROR", err));

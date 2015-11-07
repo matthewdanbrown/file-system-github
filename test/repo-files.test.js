@@ -1,0 +1,48 @@
+"use strict";
+import { expect } from "chai";
+import fs from "fs-extra";
+import fsPath from "path";
+import repoFiles from "../src/repo-files";
+
+
+describe("repo-files", function() {
+  afterEach(() => fs.removeSync("./test/.temp"));
+
+
+  it("has a given set of files", () => {
+    const repo = repoFiles([
+      { path: "/one", content: "one" },
+      { path: "/two", content: "two" }
+    ]);
+    expect(repo.files[0].path).to.equal("/one");
+    expect(repo.files[1].content).to.equal("two");
+  });
+
+
+  describe("save", function() {
+    let repo;
+    beforeEach(() => {
+      repo = repoFiles([
+        { path: "README.md", content: "# Title" },
+        { path: "/folder/index.js", content: "var foo = 123;" }
+      ]);
+    });
+
+
+    it("throws if a 'targetFolder' is not specified", () => {
+      expect(() => repo.save()).to.throw();
+    });
+
+
+    it("saves files to disk", (done) => {
+      repo.save("./test/.temp")
+      .then(result => {
+          const content = (path) => fs.readFileSync(fsPath.resolve(path)).toString();
+          expect(content(result.files[0])).to.contain("# Title");
+          expect(content(result.files[1])).to.contain("var foo = 123;");
+          done();
+      })
+      .catch(err => console.error(err));
+    });
+  });
+});
