@@ -1,4 +1,5 @@
 "use strict";
+import R from "ramda";
 import { expect } from "chai";
 import fs from "fs-extra";
 import fsPath from "path";
@@ -37,9 +38,10 @@ describe("repo-files", function() {
     it("saves files to disk", (done) => {
       repo.save("./test/.temp")
       .then(result => {
+          const files = result.files.sort();
           const content = (path) => fs.readFileSync(fsPath.resolve(path)).toString();
-          expect(content(result.files[0])).to.contain("# Title");
-          expect(content(result.files[1])).to.contain("var foo = 123;");
+          expect(content(files[0])).to.contain("# Title");
+          expect(content(files[1])).to.contain("var foo = 123;");
           done();
       })
       .catch(err => console.error(err));
