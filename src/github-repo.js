@@ -6,6 +6,31 @@ import githubPaths from "./github-paths";
 import Promise from "bluebird";
 
 
+const removeRootSlash = (path) => path.replace(/^\//, "");
+const trimmedFolderPath = (path, entryFolder) => {
+    path = path.replace(new RegExp(`${ entryFolder }`), "");
+    path = fsPath.dirname(path);
+    path = removeRootSlash(path);
+    return path;
+};
+
+
+
+const trimEntryPath = (entryPath, files) => {
+    files = R.clone(files);
+    let entryFolder = entryPath;
+    if (files.length === 1 && files[0].type === "file") {
+      // A single file was downloaded.
+      // Extract the directory part of the string.
+      entryFolder = fsPath.dirname(entryFolder);
+    }
+    entryFolder = removeRootSlash(entryFolder);
+    files.forEach(file => file.folder = trimmedFolderPath(file.path, entryFolder));
+    return files;
+  };
+
+
+
 
 /**
  * A representation of a Github repository.
@@ -46,26 +71,24 @@ export default (userAgent, repo, options = {}) => {
    *                              Default: "master".
    * @return {Promise}
    */
-  const copy = (entryPath, targetPath, options = {}) => {
+  const get = (entryPath, options = {}) => {
     // Setup initial conditions.
     const deep = options.deep === undefined ? true : options.deep;
-    targetPath = fsPath.resolve(targetPath);
     entryPath = entryPath || "/";
 
     return new Promise((resolve, reject) => {
-        const saveFile = (path, content) => {
-            return new Promise((resolve, reject) => {
-                const saveTo = fsPath.join(targetPath, path);
-                fs.outputFile(saveTo, content, (err) => {
-                  if (err) { reject(err); } else { resolve(); }
-                });
-              });
-            };
-
-        const downloadFile = (url) => {
+        const downloaded = { files: [] };
+        const downloadFile = (file) => {
               return new Promise((resolve, reject) => {
-                http.get(url)
-                  .then(result => resolve(result.data))
+                http.get(file.download_url)
+                  .then(result => {
+                      const item = {
+                        content: result.data,
+                        path: fsPath.join(file.folder, file.name)
+                      };
+                      downloaded.files.push(item);
+                      resolve(item);
+                  })
                   .catch(err => reject(err));
               });
             };
@@ -73,42 +96,102 @@ export default (userAgent, repo, options = {}) => {
         // Retrieve paths then save the files.
         filePaths(entryPath, options)
           .then(result => {
-            let savedCount = 0;
-            const saved = { base: targetPath, files: [] };
-            const onSaved = (path) => {
-                  savedCount += 1;
-                  saved.files.push(path)
-                  if (savedCount == result.files.length) { resolve(saved); }
+            // console.log("result", result);
+
+            // Trim entry-folder from the start of the retrieved file paths.
+            const files = trimEntryPath(entryPath, result.files);
+            const onFileDownloaded = () => {
+                  if (downloaded.files.length === files.length) { resolve(downloaded); }
                 };
 
-            // Trim entry-folder from the resulting files.
-            let files = result.files;
-            let entryFolder = entryPath;
-            if (files.length === 1 && files[0].path === entryPath) {
-              entryFolder = fsPath.dirname(entryFolder);
-            }
-            entryFolder = entryFolder.replace(/^\//, "");
-            files = R.map(file => {
-                  file = R.clone(file);
-                  file.path = file.path.replace(new RegExp(`${ entryFolder }`), "")
-                  return file;
-                }, files);
-
-            // Download and save each file.
+            // Download files.
             files.forEach(file => {
-                  downloadFile(file.download_url)
-                  .then(content => {
-                      saveFile(file.path, content)
-                      .then(() => onSaved(file.path))
-                      .catch(err => reject(err));
-                  })
-                  .catch(err => reject(err));
+                  downloadFile(file)
+                    .then(content => onFileDownloaded())
+                    .catch(err => reject(err));
                 });
           })
           .catch(err => reject(err));
     });
   };
 
+  /**
+   * Copies files from the remote repository to the given path.
+   *
+   * @param {string} entryPath:   The path within the repository to copy.
+   *                              Pass "/" or nothing to copy from root.
+   * @param {string} targetPath:  The local path to copy to.
+   * @param {object} options:
+   *                    - deep:   Flag indicating if the folder structure should
+   *                              be recursively retrieved.
+   *                              Default: true.
+   *                    - branch: The branch to query.
+   *                              Default: "master".
+   * @return {Promise}
+   */
+  const copy = (entryPath, targetPath, options = {}) => {
+  //   // Setup initial conditions.
+  //   const deep = options.deep === undefined ? true : options.deep;
+  //   targetPath = fsPath.resolve(targetPath);
+  //   entryPath = entryPath || "/";
+  //
+  //   return new Promise((resolve, reject) => {
+  //       const saveFile = (path, content) => {
+  //           return new Promise((resolve, reject) => {
+  //               const saveTo = fsPath.join(targetPath, path);
+  //               fs.outputFile(saveTo, content, (err) => {
+  //                 if (err) { reject(err); } else { resolve(); }
+  //               });
+  //             });
+  //           };
+  //
+  //       const downloadFile = (url) => {
+  //             return new Promise((resolve, reject) => {
+  //               http.get(url)
+  //                 .then(result => resolve(result.data))
+  //                 .catch(err => reject(err));
+  //             });
+  //           };
+  //
+  //       // Retrieve paths then save the files.
+  //       filePaths(entryPath, options)
+  //         .then(result => {
+  //           let savedCount = 0;
+  //           const saved = { base: targetPath, files: [] };
+  //           const onSaved = (path) => {
+  //                 savedCount += 1;
+  //                 saved.files.push(path)
+  //                 if (savedCount == result.files.length) { resolve(saved); }
+  //               };
+  //
+  //           // Trim entry-folder from the resulting files.
+  //           let files = result.files;
+  //           let entryFolder = entryPath;
+  //           if (files.length === 1 && files[0].path === entryPath) {
+  //             entryFolder = fsPath.dirname(entryFolder);
+  //           }
+  //           entryFolder = entryFolder.replace(/^\//, "");
+  //           files = R.map(file => {
+  //                 file = R.clone(file);
+  //                 file.path = file.path.replace(new RegExp(`${ entryFolder }`), "")
+  //                 return file;
+  //               }, files);
+  //
+  //           // Download and save each file.
+  //           files.forEach(file => {
+  //                 downloadFile(file.download_url)
+  //                 .then(content => {
+  //                     saveFile(file.path, content)
+  //                     .then(() => onSaved(file.path))
+  //                     .catch(err => reject(err));
+  //                 })
+  //                 .catch(err => reject(err));
+  //               });
+  //         })
+  //         .catch(err => reject(err));
+  //   });
+  };
+
   // API.
-  return { name: repo, filePaths, copy };
+  return { name: repo, filePaths, get };
 };
