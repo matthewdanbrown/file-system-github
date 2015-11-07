@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased]
 #### Added
 #### Changed
+- When an entry path is specified to `.copy()` the resulting files are copied into the root of the `target` folder.
+
 #### Deprecated
 #### Removed
 #### Fixed
