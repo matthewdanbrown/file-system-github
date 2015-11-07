@@ -29,7 +29,7 @@ describe("github-paths (integration)", function() {
         expect(result.files.length).to.equal(1);
         done();
     })
-    .catch(err => console.log("ERROR", err));
+    .catch(err => console.error("ERROR", err));
   });
 
 
@@ -45,7 +45,7 @@ describe("github-paths (integration)", function() {
         expect(result.files[5].path).to.equal("test/sample/folder/sub-folder-1/sub-folder-1a/README.md");
         done();
     })
-    .catch(err => console.log("ERROR", err));
+    .catch(err => console.error("ERROR", err));
   });
 
 
@@ -56,7 +56,7 @@ describe("github-paths (integration)", function() {
         expect(result.files[0].path).to.equal("test/sample/README.md");
         done();
     })
-    .catch(err => console.log("ERROR", err));
+    .catch(err => console.error("ERROR", err));
   });
 
 
@@ -66,6 +66,6 @@ describe("github-paths (integration)", function() {
         expect(err.message).to.contain("not/a/path");
         done()
     })
-    .catch(err => console.log("ERROR", err));
+    .catch(err => console.error("ERROR", err));
   });
 });

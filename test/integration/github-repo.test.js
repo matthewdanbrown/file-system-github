@@ -46,7 +46,7 @@ describe("github-repo (integration)", function() {
         expect(result.files[0].name).to.equal("README.md");
         done();
     })
-    .catch(err => console.log("ERROR", err));
+    .catch(err => console.error("ERROR", err));
   });
 
 
@@ -60,7 +60,7 @@ describe("github-repo (integration)", function() {
           expect(content).to.contain("Branch: master");
           done();
       })
-      .catch(err => console.log("ERROR", err));
+      .catch(err => console.error("ERROR", err));
     });
 
     it("copies a single file (specified branch)", (done) => {
@@ -72,7 +72,7 @@ describe("github-repo (integration)", function() {
           expect(content).to.contain("Branch: sample-test-branch");
           done();
       })
-      .catch(err => console.log("ERROR", err));
+      .catch(err => console.error("ERROR", err));
     });
 
 
@@ -84,7 +84,7 @@ describe("github-repo (integration)", function() {
           expect(content).to.contain("# Sample README file.");
           done();
       })
-      .catch(err => console.log("ERROR", err));
+      .catch(err => console.error("ERROR", err));
     });
   });
 });

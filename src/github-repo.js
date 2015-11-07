@@ -50,6 +50,7 @@ export default (userAgent, repo, options = {}) => {
     // Setup initial conditions.
     const deep = options.deep === undefined ? true : options.deep;
     targetPath = fsPath.resolve(targetPath);
+    entryPath = entryPath || "/";
 
     return new Promise((resolve, reject) => {
         const saveFile = (path, content) => {
@@ -79,7 +80,22 @@ export default (userAgent, repo, options = {}) => {
                   saved.files.push(path)
                   if (savedCount == result.files.length) { resolve(saved); }
                 };
-            result.files.forEach(file => {
+
+            // Trim entry-folder from the resulting files.
+            let files = result.files;
+            let entryFolder = entryPath;
+            if (files.length === 1 && files[0].path === entryPath) {
+              entryFolder = fsPath.dirname(entryFolder);
+            }
+            entryFolder = entryFolder.replace(/^\//, "");
+            files = R.map(file => {
+                  file = R.clone(file);
+                  file.path = file.path.replace(new RegExp(`${ entryFolder }`), "")
+                  return file;
+                }, files);
+
+            // Download and save each file.
+            files.forEach(file => {
                   downloadFile(file.download_url)
                   .then(content => {
                       saveFile(file.path, content)
