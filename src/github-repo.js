@@ -1,9 +1,11 @@
 import R from "ramda";
 import fs from "fs-extra";
+import Promise from "bluebird";
 import fsPath from "path";
 import githubHttp from "./github-http";
 import githubPaths from "./github-paths";
-import Promise from "bluebird";
+import repoFiles from "./repo-files";
+
 
 
 const removeRootSlash = (path) => path.replace(/^\//, "");
@@ -12,7 +14,7 @@ const trimmedFolderPath = (path, entryFolder) => {
     path = fsPath.dirname(path);
     path = removeRootSlash(path);
     return path;
-};
+  };
 
 
 
@@ -28,7 +30,6 @@ const trimEntryPath = (entryPath, files) => {
     files.forEach(file => file.folder = trimmedFolderPath(file.path, entryFolder));
     return files;
   };
-
 
 
 
@@ -77,7 +78,7 @@ export default (userAgent, repo, options = {}) => {
     entryPath = entryPath || "/";
 
     return new Promise((resolve, reject) => {
-        const downloaded = { files: [] };
+        const downloadedFiles = [];
         const downloadFile = (file) => {
               return new Promise((resolve, reject) => {
                 http.get(file.download_url)
@@ -86,7 +87,7 @@ export default (userAgent, repo, options = {}) => {
                         content: result.data,
                         path: fsPath.join(file.folder, file.name)
                       };
-                      downloaded.files.push(item);
+                      downloadedFiles.push(item);
                       resolve(item);
                   })
                   .catch(err => reject(err));
@@ -96,12 +97,12 @@ export default (userAgent, repo, options = {}) => {
         // Retrieve paths then save the files.
         filePaths(entryPath, options)
           .then(result => {
-            // console.log("result", result);
-
             // Trim entry-folder from the start of the retrieved file paths.
             const files = trimEntryPath(entryPath, result.files);
             const onFileDownloaded = () => {
-                  if (downloaded.files.length === files.length) { resolve(downloaded); }
+                  if (downloadedFiles.length === files.length) {
+                    resolve(repoFiles(downloadedFiles));
+                  }
                 };
 
             // Download files.
@@ -114,6 +115,7 @@ export default (userAgent, repo, options = {}) => {
           .catch(err => reject(err));
     });
   };
+
 
   /**
    * Copies files from the remote repository to the given path.

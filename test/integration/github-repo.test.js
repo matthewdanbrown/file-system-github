@@ -58,6 +58,7 @@ describe("github-repo (integration)", function() {
           expect(file.path).to.equal("README.md");
           expect(file.content).to.contain("# Sample README file.");
           expect(file.content).to.contain("Branch: master");
+          expect(result.save).to.be.an.instanceof(Function);
           done();
       })
       .catch(err => console.error("ERROR", err));
