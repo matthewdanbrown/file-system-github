@@ -77,24 +77,25 @@ export default (userAgent, repo, options = {}) => {
     const deep = options.deep === undefined ? true : options.deep;
     entryPath = entryPath || "/";
 
-    return new Promise((resolve, reject) => {
-        const downloadedFiles = [];
-        const downloadFile = (file) => {
-              return new Promise((resolve, reject) => {
-                http.get(file.download_url)
-                  .then(result => {
-                      const item = {
-                        content: result.data,
-                        path: fsPath.join(file.folder, file.name)
-                      };
-                      downloadedFiles.push(item);
-                      resolve(item);
-                  })
-                  .catch(err => reject(err));
-              });
-            };
+    // Download an individual file.
+    const downloadedFiles = [];
+    const downloadFile = (file) => {
+          return new Promise((resolve, reject) => {
+            http.get(file.download_url)
+              .then(result => {
+                  const item = {
+                    content: result.data,
+                    path: fsPath.join(file.folder, file.name)
+                  };
+                  downloadedFiles.push(item);
+                  resolve(item);
+              })
+              .catch(err => reject(err));
+          });
+        };
 
-        // Retrieve paths then save the files.
+    // Retrieve paths then save each to the local file-system.
+    return new Promise((resolve, reject) => {
         filePaths(entryPath, options)
           .then(result => {
             // Trim entry-folder from the start of the retrieved file paths.
