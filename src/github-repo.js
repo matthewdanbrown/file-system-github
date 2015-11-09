@@ -32,6 +32,13 @@ const trimEntryPath = (entryPath, files) => {
   };
 
 
+const decode = (value) => {
+    if (value) {
+      return new Buffer(value, "base64").toString();
+    }
+  };
+
+
 
 /**
  * A representation of a Github repository.
@@ -81,16 +88,24 @@ export default (userAgent, repo, options = {}) => {
     const downloadedFiles = [];
     const downloadFile = (file) => {
           return new Promise((resolve, reject) => {
-            http.get(file.download_url)
-              .then(result => {
+            const done = (content) => {
                   const item = {
-                    content: result.data,
+                    content: decode(content),
                     path: fsPath.join(file.folder, file.name)
                   };
                   downloadedFiles.push(item);
                   resolve(item);
-              })
-              .catch(err => reject(err));
+            };
+
+            if (file.content) {
+              // The content is already downloaded.
+              done(file.content);
+            } else {
+              // Content not included within payload. Download it now.
+              http.get(file.url)
+                .then(result => done(result.data.content))
+                .catch(err => reject(err));
+            }
           });
         };
 
