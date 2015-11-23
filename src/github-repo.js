@@ -65,6 +65,8 @@ export default (userAgent, repo, options = {}) => {
   const filePaths = (path, options) => githubPaths(http, repo).files(path, options);
 
 
+
+
   /**
    * Copies files from the remote repository to the given path.
    *
@@ -90,7 +92,7 @@ export default (userAgent, repo, options = {}) => {
           return new Promise((resolve, reject) => {
             const done = (content) => {
                   const item = {
-                    content: decode(content),
+                    content, // Base64 encoded.
                     path: fsPath.join(file.folder, file.name)
                   };
                   downloadedFiles.push(item);
@@ -109,7 +111,7 @@ export default (userAgent, repo, options = {}) => {
           });
         };
 
-    // Retrieve paths then save each to the local file-system.
+    // Retrieve paths then retrieve each to memory.
     return new Promise((resolve, reject) => {
         filePaths(entryPath, options)
           .then(result => {

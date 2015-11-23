@@ -5,6 +5,9 @@ import fs from "fs-extra";
 import fsPath from "path";
 import githubRepo from "../../src/github-repo";
 
+const SAVE_PATH = "./test/.temp";
+const decode = (value) => new Buffer(value, "base64").toString();
+
 
 describe("github-repo (integration)", function() {
   this.timeout(8 * 1000);
@@ -21,7 +24,7 @@ describe("github-repo (integration)", function() {
                       "philcockfield/file-system-github",
                       { token: process.env.GITHUB_TOKEN });
   });
-  afterEach(() => fs.removeSync("./test/.temp"));
+  afterEach(() => fs.removeSync(SAVE_PATH));
 
 
 
@@ -54,10 +57,10 @@ describe("github-repo (integration)", function() {
         .then(result => {
             const file = result.files[0];
             expect(file.path).to.equal("README.md");
-            expect(file.content).to.contain("# Sample README file.");
-            expect(file.content).to.contain("Branch: master");
+            expect(decode(file.content)).to.contain("# Sample README file.");
+            expect(decode(file.content)).to.contain("Branch: master");
             expect(result.save).to.be.an.instanceof(Function);
-        })
+        });
     });
 
 
@@ -66,8 +69,8 @@ describe("github-repo (integration)", function() {
         .then(result => {
             const file = result.files[0];
             expect(file.path).to.equal("README.md");
-            expect(file.content).to.contain("# Sample README file.");
-            expect(file.content).to.contain("Branch: sample-test-branch");
+            expect(decode(file.content)).to.contain("# Sample README file.");
+            expect(decode(file.content)).to.contain("Branch: sample-test-branch");
         });
     });
 
@@ -76,14 +79,41 @@ describe("github-repo (integration)", function() {
       return repo.get("/test/sample")
         .then(result => {
             const files = R.sortBy(R.prop("path"), result.files);
-            expect(files.length).to.equal(6);
+            expect(files.length).to.equal(7);
 
             expect(files[0].path).to.equal("README.md");
-            expect(files[0].content).to.contain("# Sample README file.");
+            expect(decode(files[0].content)).to.contain("# Sample README file.");
 
             expect(files[1].path).to.equal("folder/README.md");
-            expect(files[1].content).to.contain("# Test conflict with matching file-name");
+            expect(decode(files[1].content)).to.contain("# Test conflict with matching file-name");
         })
+    });
+  });
+
+
+  describe("save files", function() {
+    it("saves a text file", () => {
+      return repo.get("/test/sample/folder/index.js")
+        .then(files => {
+          return files.save(SAVE_PATH)
+            .then(result => {
+                const savedContent = fs.readFileSync("./test/.temp/index.js").toString();
+                const originalContent = fs.readFileSync("./test/sample/folder/index.js").toString();
+                expect(savedContent).to.equal(originalContent);
+            });
+        });
+    });
+
+    it("saves an image", () => {
+      return repo.get("/test/sample/folder/octocat.jpg")
+        .then(files => {
+          return files.save(SAVE_PATH)
+            .then(result => {
+                const savedContent = fs.readFileSync("./test/.temp/octocat.jpg").toString();
+                const originalContent = fs.readFileSync("./test/sample/folder/octocat.jpg").toString();
+                expect(savedContent).to.equal(originalContent);
+            });
+        });
     });
   });
 });

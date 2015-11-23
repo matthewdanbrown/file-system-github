@@ -3,8 +3,10 @@ import fs from "fs-extra";
 import fsPath from "path";
 
 
+
 const saveFile = (path, content) => {
     return new Promise((resolve, reject) => {
+        content = new Buffer(content, "base64");
         fs.outputFile(path, content, (err) => {
           if (err) {
             reject(err);
@@ -19,6 +21,7 @@ const saveFile = (path, content) => {
 
 /**
  * Saves the collection of files to disk.
+ * @param {array} files: Array of file objects.
  * @param {string} targetFolder: The path to the folder to save the files within.
  * @return {Promise}
  */

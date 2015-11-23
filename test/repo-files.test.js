@@ -6,6 +6,9 @@ import fsPath from "path";
 import repoFiles from "../src/repo-files";
 
 
+const encode = (value) => new Buffer(value).toString("base64");
+
+
 describe("repo-files", function() {
   afterEach(() => fs.removeSync("./test/.temp"));
 
@@ -24,8 +27,8 @@ describe("repo-files", function() {
     let repo;
     beforeEach(() => {
       repo = repoFiles([
-        { path: "README.md", content: "# Title" },
-        { path: "/folder/index.js", content: "var foo = 123;" }
+        { path: "README.md", content: encode("# Title") },
+        { path: "/folder/index.js", content: encode("var foo = 123;") }
       ]);
     });
 
@@ -35,16 +38,14 @@ describe("repo-files", function() {
     });
 
 
-    it("saves files to disk", (done) => {
-      repo.save("./test/.temp")
-      .then(result => {
-          const files = result.files.sort();
-          const content = (path) => fs.readFileSync(fsPath.resolve(path)).toString();
-          expect(content(files[0])).to.contain("# Title");
-          expect(content(files[1])).to.contain("var foo = 123;");
-          done();
-      })
-      .catch(err => console.error(err));
+    it("saves files to disk", () => {
+      return repo.save("./test/.temp")
+        .then(result => {
+            const files = result.files.sort();
+            const content = (path) => fs.readFileSync(fsPath.resolve(path)).toString();
+            expect(content(files[0])).to.contain("# Title");
+            expect(content(files[1])).to.contain("var foo = 123;");
+        });
     });
   });
 });
