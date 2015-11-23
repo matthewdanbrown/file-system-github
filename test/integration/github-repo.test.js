@@ -40,58 +40,50 @@ describe("github-repo (integration)", function() {
   });
 
 
-  it("retrieves paths", (done) => {
-    repo.filePaths("/test/sample/README.md")
-    .then(result => {
-        expect(result.files[0].name).to.equal("README.md");
-        done();
-    })
-    .catch(err => console.error("ERROR", err));
+  it("retrieves paths", () => {
+    return repo.filePaths("/test/sample/README.md")
+      .then(result => {
+          expect(result.files[0].name).to.equal("README.md");
+      });
   });
 
 
   describe("get", function() {
-    it("gets a single file ('master' branch by default)", (done) => {
-      repo.get("/test/sample/README.md")
-      .then(result => {
-          const file = result.files[0];
-          expect(file.path).to.equal("README.md");
-          expect(file.content).to.contain("# Sample README file.");
-          expect(file.content).to.contain("Branch: master");
-          expect(result.save).to.be.an.instanceof(Function);
-          done();
-      })
-      .catch(err => console.error("ERROR", err));
+    it("gets a single file ('master' branch by default)", () => {
+      return repo.get("/test/sample/README.md")
+        .then(result => {
+            const file = result.files[0];
+            expect(file.path).to.equal("README.md");
+            expect(file.content).to.contain("# Sample README file.");
+            expect(file.content).to.contain("Branch: master");
+            expect(result.save).to.be.an.instanceof(Function);
+        })
     });
 
 
-    it("copies a single file (specified branch)", (done) => {
-      repo.get("/test/sample/README.md", { branch: "sample-test-branch" })
-      .then(result => {
-          const file = result.files[0];
-          expect(file.path).to.equal("README.md");
-          expect(file.content).to.contain("# Sample README file.");
-          expect(file.content).to.contain("Branch: sample-test-branch");
-          done();
-      })
-      .catch(err => console.error("ERROR", err));
+    it("copies a single file (specified branch)", () => {
+      return repo.get("/test/sample/README.md", { branch: "sample-test-branch" })
+        .then(result => {
+            const file = result.files[0];
+            expect(file.path).to.equal("README.md");
+            expect(file.content).to.contain("# Sample README file.");
+            expect(file.content).to.contain("Branch: sample-test-branch");
+        });
     });
 
 
-    it("copies a set of files (deep)", (done) => {
-      repo.get("/test/sample")
-      .then(result => {
-          const files = R.sortBy(R.prop("path"), result.files);
-          expect(files.length).to.equal(6);
+    it("copies a set of files (deep)", () => {
+      return repo.get("/test/sample")
+        .then(result => {
+            const files = R.sortBy(R.prop("path"), result.files);
+            expect(files.length).to.equal(6);
 
-          expect(files[0].path).to.equal("README.md");
-          expect(files[0].content).to.contain("# Sample README file.");
+            expect(files[0].path).to.equal("README.md");
+            expect(files[0].content).to.contain("# Sample README file.");
 
-          expect(files[1].path).to.equal("folder/README.md");
-          expect(files[1].content).to.contain("# Test conflict with matching file-name");
-          done();
-      })
-      .catch(err => console.error("ERROR", err));
+            expect(files[1].path).to.equal("folder/README.md");
+            expect(files[1].content).to.contain("# Test conflict with matching file-name");
+        })
     });
   });
 });
