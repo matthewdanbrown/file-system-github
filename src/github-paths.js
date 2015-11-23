@@ -59,7 +59,7 @@ export default (http, repo) => {
               done(); // No children to process.
             } else {
               folders.forEach(folder => {
-                    getFilePaths(folder.path) // <== RECURSION.
+                    getFilePaths(folder.path, options) // <== RECURSION.
                         .then(result => addChildren(result.files))
                         .catch(err => reject(err));
                   });
