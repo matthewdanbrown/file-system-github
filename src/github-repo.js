@@ -93,7 +93,8 @@ export default (userAgent, repo, options = {}) => {
             const done = (content) => {
                   const item = {
                     content, // Base64 encoded.
-                    path: fsPath.join(file.folder, file.name)
+                    path: fsPath.join(file.folder, file.name),
+                    toString: () => decode(content)
                   };
                   downloadedFiles.push(item);
                   resolve(item);
