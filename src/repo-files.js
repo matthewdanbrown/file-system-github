@@ -6,8 +6,7 @@ import fsPath from "path";
 
 const saveFile = (path, content) => {
     return new Promise((resolve, reject) => {
-        content = new Buffer(content, "base64");
-        fs.outputFile(path, content, (err) => {
+        fs.outputFile(path, new Buffer(content, "base64"), (err) => {
           if (err) {
             reject(err);
           } else {
