@@ -86,7 +86,8 @@ export default (http, repo) => {
         })
         .catch(err => reject({
           message: `Failed to retrieve file-paths at url: ${ url }`,
-          error: err
+          error: err,
+          status: err.status
         }));
     });
   };
