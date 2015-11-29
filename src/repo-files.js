@@ -25,10 +25,10 @@ const saveFile = (path, content) => {
  * @param {string} targetFolder: The path to the folder to save the files within.
  * @return {Promise}
  */
-const save = (files, targetFolder) =>  {
+const save = (files, targetFolder) => {
     if (R.isNil(targetFolder) || R.isEmpty(targetFolder)) { throw new Error("A target folder must be specified."); }
     return new Promise((resolve, reject) => {
-        let savedPaths = []
+        let savedPaths = [];
         const onSaved = (path) => {
               savedPaths.push(path);
               if (savedPaths.length === files.length) {

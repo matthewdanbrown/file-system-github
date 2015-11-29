@@ -48,9 +48,9 @@ export default (http, repo) => {
 
             // Add child items
             let totalFoldersProcessed = 0;
-            const addChildren = (items = []) => {
+            const addChildren = (childItems = []) => {
               totalFoldersProcessed += 1;
-              files = R.union(files, items);
+              files = R.union(files, childItems);
               if (totalFoldersProcessed >= folders.length) { done(); }
             };
 

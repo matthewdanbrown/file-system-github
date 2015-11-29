@@ -1,5 +1,4 @@
 import R from "ramda";
-import fs from "fs-extra";
 import Promise from "bluebird";
 import fsPath from "path";
 import githubHttp from "./github-http";
@@ -53,8 +52,8 @@ const decode = (value) => {
  *                             restricted resources.
  *                             see: https://github.com/settings/tokens
  */
-export default (userAgent, repo, options = {}) => {
-  const http = githubHttp(userAgent, options);
+export default (userAgent, repo, settings = {}) => {
+  const http = githubHttp(userAgent, settings);
 
   // Ensure the repository was specified.
   if (!R.is(String, repo) || R.isEmpty(repo)) {
@@ -74,16 +73,12 @@ export default (userAgent, repo, options = {}) => {
    *                              Pass "/" or nothing to copy from root.
    * @param {string} targetPath:  The local path to copy to.
    * @param {object} options:
-   *                    - deep:   Flag indicating if the folder structure should
-   *                              be recursively retrieved.
-   *                              Default: true.
    *                    - branch: The branch to query.
    *                              Default: "master".
    * @return {Promise}
    */
   const get = (entryPath, options = {}) => {
     // Setup initial conditions.
-    const deep = options.deep === undefined ? true : options.deep;
     entryPath = entryPath || "/";
 
     // Download an individual file.
@@ -127,7 +122,7 @@ export default (userAgent, repo, options = {}) => {
             // Download files.
             files.forEach(file => {
                   downloadFile(file)
-                    .then(content => onFileDownloaded())
+                    .then(() => onFileDownloaded())
                     .catch(err => reject(err));
                 });
           })
